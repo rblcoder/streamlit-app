@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import GridUpdateMode
 
 data = pd.read_csv('salaries.csv')
 
@@ -39,3 +41,22 @@ st.pyplot(fig)
 
 
 # print(df.info())
+gb = GridOptionsBuilder.from_dataframe(df)
+gb.configure_selection('single', use_checkbox=True)
+grid_options = gb.build()
+
+grid_response = AgGrid(
+       df,
+       gridOptions=grid_options,
+       update_mode=GridUpdateMode.SELECTION_CHANGED,
+       height=200,
+       width='100%',
+)
+
+selected_rows = grid_response['selected_rows']
+if selected_rows is not None:
+
+    print(selected_rows)
+    selected_row = selected_rows['work_year']
+    st.write("Details of Selected Row")
+    st.write(pd.DataFrame([selected_row]))
