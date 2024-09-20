@@ -59,4 +59,10 @@ if selected_rows is not None:
     print(selected_rows)
     selected_row = selected_rows['work_year']
     st.write("Details of Selected Row")
-    st.write(pd.DataFrame([selected_row]))
+#     st.write(pd.DataFrame([selected_row]))
+#     st.write(pd.DataFrame([selected_row]).iloc[0,0])
+#     value = str(pd.DataFrame([selected_row]).iloc[0,0])
+#     st.write(value)
+    value = pd.DataFrame([selected_row]).iloc[0,0]
+    filtered_data = data.loc[data['work_year'] == value]
+    st.write(filtered_data['job_title'].value_counts())
