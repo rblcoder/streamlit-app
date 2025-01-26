@@ -3,6 +3,55 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
+import requests
+
+def fetch_data_from_graphql_api(query, url):
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    response = requests.post(
+        url,
+        json={'query': query},
+        headers=headers
+    )
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Query failed to run by returning code of {response.status_code}. {query}")
+
+# Define your GraphQL query for the Countries API
+graphql_query = """
+{
+  countries {
+    name
+    code
+    capital
+    currency
+    emoji
+  }
+}
+"""
+
+# URL of the Countries GraphQL endpoint
+graphql_url = "https://countries.trevorblades.com/"
+
+# Fetch data
+data = fetch_data_from_graphql_api(graphql_query, graphql_url)
+
+# Extract the countries data from the JSON response
+countries_data = data['data']['countries']
+
+# Create a pandas DataFrame from the countries data
+df_countries = pd.DataFrame(countries_data)
+
+# Print the DataFrame
+print(df_countries)
+
+st.title('Data from Countries GraphQL API')
+
+st.write('### Countries Data', df_countries)
 
 data = pd.read_csv('salaries.csv')
 
