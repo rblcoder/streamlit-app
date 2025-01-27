@@ -5,24 +5,17 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import requests
 
-def fetch_data_from_graphql_api(query, url):
-    headers = {
-        "Content-Type": "application/json"
-    }
-    
-    response = requests.post(
-        url,
-        json={'query': query},
-        headers=headers
-    )
-    
+# Function to fetch data from the GraphQL endpoint
+def fetch_data_from_graphql(query, endpoint):
+    response = requests.post(endpoint, json={'query': query})
     if response.status_code == 200:
         return response.json()
     else:
-        raise Exception(f"Query failed to run by returning code of {response.status_code}. {query}")
+        raise Exception(f"Query failed with status code {response.status_code}")
 
-# Define your GraphQL query for the Countries API
-graphql_query = """
+
+# Define a GraphQL query for the Countries API
+graphql_query_country = """
 {
   countries {
     name
@@ -35,10 +28,10 @@ graphql_query = """
 """
 
 # URL of the Countries GraphQL endpoint
-graphql_url = "https://countries.trevorblades.com/"
+graphql_url_country = "https://countries.trevorblades.com/"
 
 # Fetch data
-data = fetch_data_from_graphql_api(graphql_query, graphql_url)
+data = fetch_data_from_graphql(query=graphql_query_country, endpoint=graphql_url_country)
 
 # Extract the countries data from the JSON response
 countries_data = data['data']['countries']
@@ -52,6 +45,59 @@ print(df_countries)
 st.title('Data from Countries GraphQL API')
 
 st.write('### Countries Data', df_countries)
+
+
+# Define the GraphQL endpoint for the Pokémon API
+graphql_endpoint = "https://beta.pokeapi.co/graphql/v1beta"
+
+# Define your GraphQL query to fetch data
+query = """
+{
+  pokemon_v2_pokemon(limit: 10) {
+    id
+    name
+    height
+    weight
+    base_experience
+    pokemon_v2_pokemontypes {
+      pokemon_v2_type {
+        name
+      }
+    }
+  }
+}
+"""
+
+
+# Fetch data
+data = fetch_data_from_graphql(query, graphql_endpoint)
+
+print(data)
+
+# Convert fetched data to pandas DataFrame
+pokemon_list = []
+for p in data['data']['pokemon_v2_pokemon']:
+    for t in p['pokemon_v2_pokemontypes']:
+        pokemon_list.append({
+            "id": p["id"],
+            "name": p["name"],
+            "height": p["height"],
+            "weight": p["weight"],
+            "base_experience": p["base_experience"],
+            "type": t["pokemon_v2_type"]["name"]
+        })
+
+pokemon_df = pd.DataFrame(pokemon_list)
+
+# Print the DataFrame
+print(pokemon_df)
+
+st.title('Data from Pokemon GraphQL API')
+
+st.write('### Pokemon Data', pokemon_df)
+
+
+
 
 data = pd.read_csv('salaries.csv')
 
